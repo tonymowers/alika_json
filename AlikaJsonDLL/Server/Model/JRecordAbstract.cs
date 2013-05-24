@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using System.Data;
+using System.Collections;
 
 namespace CH.Alika.Json.Server.Model
 {
@@ -44,10 +45,35 @@ namespace CH.Alika.Json.Server.Model
                 {
                     container = parent;
                 }
-                container.Add(new JProperty(path.Last(), record.GetValue(i)));
+
+                AddPropertyTo(container,  new JProperty(path.Last(), record.GetValue(i)));
             }
         }
 
+        // Adds a property to a container
+        // replaces any existing property with the new one
+        private void AddPropertyTo(JContainer container, JProperty newProperty)
+        {
+            JProperty oldProperty = null;
+               
+            foreach (JToken el in container.Children())
+            {
+                if (!(el is JProperty))
+                    continue;
+
+                JProperty p = el as JProperty;
+                    
+                if (p != null && newProperty.Name.Equals(p.Name))
+                {
+                    oldProperty = p;
+                    break;
+                }
+            }
+            if (oldProperty != null)
+                oldProperty.Remove();
+
+            container.Add(newProperty);
+        }
         public abstract bool IsNotPartOfCollection();
 
         protected string JsonPropertyName()

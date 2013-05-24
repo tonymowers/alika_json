@@ -30,7 +30,7 @@ namespace TicketServiceTest
             String response = ""; 
             using (var connection = OpenConnection())
             {
-               response = processor.process(connection, JsonConvert.SerializeObject(GetTicketingContext()));
+               response = processor.process(connection, JsonConvert.SerializeObject(GetTickets()));
             }
             Console.Out.WriteLine(response);
             Console.Out.WriteLine("done");
@@ -47,8 +47,8 @@ namespace TicketServiceTest
         {
             JsonRpcRequest message = new JsonRpcRequest();
             message.Method = "getTicketingContext";
-            message.Params = new Dictionary<string, JObject>();
-            message.Params.Add("ticketedObject", ToJObject(new EntityRef { id = "0" }));
+            message.Params = new JObject();
+            message.Params.Add("ticketedObject", ToJToken(new EntityRef { id = "0" }));
 
             return message;
         }
@@ -57,7 +57,7 @@ namespace TicketServiceTest
         {
             JsonRpcRequest message = new JsonRpcRequest();
             message.Method = "getTickets";
-            message.Params = new Dictionary<string, JObject>();
+            message.Params = new JObject();
             EntityLoadConfig pageLoadConfig = new EntityLoadConfig
             {
                 offset = 0,
@@ -66,14 +66,19 @@ namespace TicketServiceTest
                     new FilterConfig { value = "1" }
                 }
             };
-            message.Params.Add("pageLoadConfig", ToJObject(pageLoadConfig));
+
+            message.Params.Add("offset", 0);
+            message.Params.Add("limit", 100);
+            message.Params.Add("filters", 
+                ToJToken(new List<FilterConfig> {                    
+                    new FilterConfig { value = "1" }
+                }));
             return message;
         }
 
-        private static JObject ToJObject(Object o)
+        private static JToken ToJToken(Object o)
         {
-            String json = JsonConvert.SerializeObject(o);
-            return JsonConvert.DeserializeObject<JObject>(json);
+            return JToken.FromObject(o);
         }
     }
 

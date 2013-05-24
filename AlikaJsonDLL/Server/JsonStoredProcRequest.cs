@@ -48,7 +48,7 @@ namespace CH.Alika.Json.Server
         private JToken LookupStprocParamInRequest(string name)
         {
             string jsonPath = fieldNameXlator.StProcVariableNameToJsonPath(name);
-            JObject p = request == null ? null : request.Params.Values.First<JObject>();
+            JObject p = request == null ? null : request.Params;
             return p == null ? null : p.SelectToken(jsonPath);
         }
 

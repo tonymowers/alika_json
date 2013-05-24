@@ -12,6 +12,6 @@ namespace CH.Alika.Json.Shared.Model
     {
         public String ApiVersion { get; set; }
         public String Method { get; set; }
-        public Dictionary<String, JObject> Params { get; set; }
+        public JObject Params { get; set; }
     }
 }
