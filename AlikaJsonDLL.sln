@@ -13,8 +13,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B9A57374-EE12-4FFC-8B8B-62B2E6CFAED4}"
 	ProjectSection(SolutionItems) = preProject
 		AlikaJsonDLL.vsmdi = AlikaJsonDLL.vsmdi
-		Local.testsettings = Local.testsettings
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
 Global
