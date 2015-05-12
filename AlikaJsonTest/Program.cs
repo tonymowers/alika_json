@@ -10,7 +10,7 @@ using CH.Alika.Json.Server;
 using System.Data.SqlClient;
 using System.Data;
 
-namespace TicketServiceTest
+namespace CH.Alika.Json.Test
 {
     class Program
     {
@@ -38,7 +38,7 @@ namespace TicketServiceTest
 
         private static SqlConnection OpenConnection()
         {
-            var c = new SqlConnection(Properties.Settings.Default.SampleConnectionString);
+            var c = new SqlConnection(Properties.Settings.Default.AlikaJsonTestConnectionString);
             c.Open();
             return c;
         }

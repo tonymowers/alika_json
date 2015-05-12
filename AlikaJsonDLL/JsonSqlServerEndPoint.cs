@@ -14,15 +14,15 @@ namespace CH.Alika.Json
 {
     public class JsonSqlServerEndPoint
     {
-        private String storedProcedurePrefix;
-        private IStoredProcRequest requestContext;
-        private string sp_sproc_columns;
+        private readonly String _storedProcedurePrefix;
+        private readonly IStoredProcRequest _requestContext;
+        private readonly string _spSprocColumns;
 
         public JsonSqlServerEndPoint(JsonSqlServerSettings settings)
         {
-            storedProcedurePrefix = settings.StoredProcedurePrefix ?? "";
-            requestContext = settings.RequestContext ?? new NullRequestContext();
-            sp_sproc_columns = settings.MetaDataStoredProcName ?? "sp_sproc_columns";
+            _storedProcedurePrefix = settings.StoredProcedurePrefix ?? "";
+            _requestContext = settings.RequestContext ?? new NullRequestContext();
+            _spSprocColumns = settings.MetaDataStoredProcName ?? "sp_sproc_columns";
         }
 
         public string process(SqlConnection connection, string payload)
@@ -31,7 +31,7 @@ namespace CH.Alika.Json
             JObject response = new JObject();
 
 
-            StoredProcInvoker proc = new StoredProcInvoker(storedProcedurePrefix, sp_sproc_columns);
+            StoredProcInvoker proc = new StoredProcInvoker(_storedProcedurePrefix, _spSprocColumns);
             response = proc.invoke(connection, CreateRequest(request));
 
             return JsonConvert.SerializeObject(response, new JsonSerializerSettings { Formatting = Formatting.Indented });
@@ -39,7 +39,7 @@ namespace CH.Alika.Json
 
         private IStoredProcRequest CreateRequest(JsonRpcRequest jsonRequest)
         {
-            return new StoredProcRequest(requestContext, new JsonStoredProcRequest(jsonRequest));
+            return new StoredProcRequest(_requestContext, new JsonStoredProcRequest(jsonRequest));
         }
 
         private class NullRequestContext : IStoredProcRequest
