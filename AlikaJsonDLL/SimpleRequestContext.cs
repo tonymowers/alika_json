@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using CH.Alika.Json.Server;
 using System.Data;
 using System.Data.SqlClient;
+using CH.Alika.Json.Server;
 
 namespace CH.Alika.Json
 {
     public class SimpleRequestContext : IStoredProcRequest
     {
-        Dictionary<string, object> dictionary;
+        readonly Dictionary<string, object> _dictionary;
 
         public SimpleRequestContext(Dictionary<string, object> dictionary)
         {
-            this.dictionary = dictionary;
+            this._dictionary = new Dictionary<string, object>(dictionary,StringComparer.OrdinalIgnoreCase);
         }
 
         string IStoredProcRequest.Method
@@ -27,7 +25,7 @@ namespace CH.Alika.Json
             string name = stprocParamInfo.Name.ToLowerInvariant().Substring(1);
             object value;
 
-            if (dictionary.TryGetValue(name,out value))
+            if (_dictionary.TryGetValue(name,out value))
             {
                 return new StoredProcParam(stprocParamInfo.Name, value);
             }

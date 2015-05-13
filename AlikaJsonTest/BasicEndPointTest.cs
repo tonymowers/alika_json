@@ -40,7 +40,7 @@ namespace CH.Alika.Json.Test
             JsonRpcRequest rpcRequest = new JsonRpcRequest
             {
                 ApiVersion = "1.0",
-                Method = "getUsers"
+                Method = "UsersGet"
             };
             string response;
             using (var connection = OpenConnection())
@@ -58,7 +58,7 @@ namespace CH.Alika.Json.Test
             JsonRpcRequest rpcRequest = new JsonRpcRequest
             {
                 ApiVersion = "1.0",
-                Method = "getUser",
+                Method = "UserGet",
                 Params = new JObject {{"userID", "juser"}}
             };
             string response;
@@ -70,5 +70,55 @@ namespace CH.Alika.Json.Test
             Console.Out.WriteLine(response);
             Console.Out.WriteLine("done");
         }
+
+        [Test]
+        public void UpdateUser()
+        {
+            UserData user = new UserData
+            {
+                userID = "juser",
+                firstName = "Joe",
+                lastName = "User"
+            };
+            JsonRpcRequest rpcRequest = new JsonRpcRequest
+            {
+                ApiVersion = "1.0",
+                Method = "UserUpdate",
+                Params = new JObject { { "user", JToken.FromObject(user) } }
+            };
+            string response;
+            using (var connection = OpenConnection())
+            {
+                string request = JsonConvert.SerializeObject(rpcRequest);
+                response = _endpoint.process(connection, request);
+            }
+            Console.Out.WriteLine(response);
+            Console.Out.WriteLine("done");
+        }
+
+        [Test]
+        public void GetSessionDetails()
+        {
+            JsonRpcRequest rpcRequest = new JsonRpcRequest
+            {
+                ApiVersion = "1.0",
+                Method = "SessionDetailsGet",
+            };
+            string response;
+            using (var connection = OpenConnection())
+            {
+                string request = JsonConvert.SerializeObject(rpcRequest);
+                response = _endpoint.process(connection, request);
+            }
+            Console.Out.WriteLine(response);
+            Console.Out.WriteLine("done");
+        }
+    }
+
+    class UserData
+    {
+        public string userID { get; set; }
+        public string firstName { get; set; }
+        public string lastName { get; set; }
     }
 }
