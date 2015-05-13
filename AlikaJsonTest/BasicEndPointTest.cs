@@ -72,13 +72,13 @@ namespace CH.Alika.Json.Test
         }
 
         [Test]
-        public void UpdateUser()
+        public void UpdateUserUsingXmlParam()
         {
             UserData user = new UserData
             {
-                userID = "juser",
-                firstName = "Joe",
-                lastName = "User"
+                UserId = "juser",
+                FirstName = "Joe",
+                LastName = "User"
             };
             JsonRpcRequest rpcRequest = new JsonRpcRequest
             {
@@ -113,12 +113,40 @@ namespace CH.Alika.Json.Test
             Console.Out.WriteLine(response);
             Console.Out.WriteLine("done");
         }
+
+        [Test]
+        public void GetUsersViaDispatch()
+        {
+            JsonSqlServerEndPoint alternativeEndpoint = new JsonSqlServerEndPoint(
+                new JsonSqlServerSettings
+                {
+                    MetaDataStoredProcName = "stproc_ActionInfoGet",
+                    RequestContext = new SimpleRequestContext(new Dictionary<string, object>
+                    {
+                        { "sessionID", 20 }
+                    })
+                });    
+
+            JsonRpcRequest rpcRequest = new JsonRpcRequest
+            {
+                ApiVersion = "1.0",
+                Method = "USERS_GET",
+            };
+            string response;
+            using (var connection = OpenConnection())
+            {
+                string request = JsonConvert.SerializeObject(rpcRequest);
+                response = alternativeEndpoint.process(connection, request);
+            }
+            Console.Out.WriteLine(response);
+            Console.Out.WriteLine("done");
+        }
     }
 
     class UserData
     {
-        public string userID { get; set; }
-        public string firstName { get; set; }
-        public string lastName { get; set; }
+        public string UserId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 }
