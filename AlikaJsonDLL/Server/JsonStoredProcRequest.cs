@@ -27,6 +27,14 @@ namespace CH.Alika.Json.Server
             }
         }
 
+        public string AccessKey
+        {
+            get
+            {
+                return request == null ? null : request.AccessKey;
+            }
+        }
+
         public IStoredProcParam CreateStoredProcParam(IStoredProcParamInfo stprocParamInfo)
         {
             string name = stprocParamInfo.Name; //  stprocParamInfo["COLUMN_NAME"].ToString();

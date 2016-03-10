@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using CH.Alika.Json.Server;
 using CH.Alika.Json.Shared.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -23,43 +24,46 @@ namespace CH.Alika.Json.Test
         [SetUp]
         public void SetUp()
         {
-            _endpoint =  new JsonSqlServerEndPoint(
+            _endpoint = new JsonSqlServerEndPoint(
                 new JsonSqlServerSettings
                 {
-                    StoredProcedurePrefix = "stproc_alika_",
-                    RequestContext = new SimpleRequestContext(new Dictionary<string, object>
-                    {
-                        { "sessionID", 20 }
-                    })
-                });    
+                    MetaDataStoredProcName = "stproc_test_ActionInfoGet",
+                    RequestContext = RequestFactory.Create(
+                        null,
+                        "1234",
+                        new Dictionary<string, object>
+                        {
+                            {"sessionID", 20}
+                        })
+                });
         }
 
         [Test]
-        public void GetUsers()
+        public void Echo()
         {
             JsonRpcRequest rpcRequest = new JsonRpcRequest
             {
                 ApiVersion = "1.0",
-                Method = "UsersGet"
+                Method = "stproc_test_Echo",
+                Params = new JObject{{"msg","hello"}}
             };
             string response;
             using (var connection = OpenConnection())
             {
-                string request = JsonConvert.SerializeObject(rpcRequest);
-                response = _endpoint.process(connection,request);
+                response = _endpoint.Process(connection, RequestFactory.Create(rpcRequest));
             }
             Console.Out.WriteLine(response);
-            Console.Out.WriteLine("done");  
+            Console.Out.WriteLine("done");
         }
 
         [Test]
-        public void GetUser()
+        public void ObjectGet()
         {
             JsonRpcRequest rpcRequest = new JsonRpcRequest
             {
                 ApiVersion = "1.0",
-                Method = "UserGet",
-                Params = new JObject {{"userID", "juser"}}
+                Method = "stproc_test_ObjectGet",
+                Params = new JObject {{"objectID", "10"}}
             };
             string response;
             using (var connection = OpenConnection())
@@ -72,7 +76,7 @@ namespace CH.Alika.Json.Test
         }
 
         [Test]
-        public void UpdateUserUsingXmlParam()
+        public void ObjectUpdate()
         {
             UserData user = new UserData
             {
@@ -83,8 +87,12 @@ namespace CH.Alika.Json.Test
             JsonRpcRequest rpcRequest = new JsonRpcRequest
             {
                 ApiVersion = "1.0",
-                Method = "UserUpdate",
-                Params = new JObject { { "user", JToken.FromObject(user) } }
+                Method = "stproc_test_ObjectUpdate",
+                Params = new JObject
+                {
+                    {"objectID", "10"},
+                    {"object", JToken.FromObject(user)}
+                }
             };
             string response;
             using (var connection = OpenConnection())
@@ -97,35 +105,17 @@ namespace CH.Alika.Json.Test
         }
 
         [Test]
-        public void GetSessionDetails()
-        {
-            JsonRpcRequest rpcRequest = new JsonRpcRequest
-            {
-                ApiVersion = "1.0",
-                Method = "SessionDetailsGet",
-            };
-            string response;
-            using (var connection = OpenConnection())
-            {
-                string request = JsonConvert.SerializeObject(rpcRequest);
-                response = _endpoint.process(connection, request);
-            }
-            Console.Out.WriteLine(response);
-            Console.Out.WriteLine("done");
-        }
-
-        [Test]
-        public void GetUsersViaDispatch()
+        public void BadAccessKey()
         {
             JsonSqlServerEndPoint alternativeEndpoint = new JsonSqlServerEndPoint(
                 new JsonSqlServerSettings
                 {
-                    MetaDataStoredProcName = "stproc_ActionInfoGet",
-                    RequestContext = new SimpleRequestContext(new Dictionary<string, object>
+                    MetaDataStoredProcName = "stproc_test_ActionInfoGet",
+                    RequestContext = RequestFactory.Create(null, null, new Dictionary<string, object>
                     {
-                        { "sessionID", 20 }
+                        {"sessionID", 20}
                     })
-                });    
+                });
 
             JsonRpcRequest rpcRequest = new JsonRpcRequest
             {

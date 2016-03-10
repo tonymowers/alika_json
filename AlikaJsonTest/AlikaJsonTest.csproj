@@ -118,15 +118,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AlikaJsonTest.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="AlikaJsonTest_log.ldf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <DependentUpon>AlikaJsonTest.mdf</DependentUpon>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\AlikaJsonDLL\AlikaJsonDLL.csproj">
       <Project>{8B07EE80-5843-4032-8907-746138B74433}</Project>
       <Name>AlikaJsonDLL</Name>

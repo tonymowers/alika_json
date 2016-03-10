@@ -9,6 +9,7 @@ namespace CH.Alika.Json.Server
     public interface IStoredProcRequest
     {
         String Method { get; }
+        String AccessKey { get; }
         IStoredProcParam CreateStoredProcParam(IStoredProcParamInfo stprocParamInfo);
     }
 }

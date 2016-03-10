@@ -14,37 +14,38 @@ namespace CH.Alika.Json
 {
     public class JsonSqlServerEndPoint
     {
-        private readonly String _storedProcedurePrefix;
+        private readonly ISqlCommandFactory _sqlCmdFactory;
         private readonly IStoredProcRequest _requestContext;
-        private readonly string _spSprocColumns;
 
         public JsonSqlServerEndPoint(JsonSqlServerSettings settings)
         {
-            _storedProcedurePrefix = settings.StoredProcedurePrefix ?? "";
+            string storedProcedurePrefix = settings.StoredProcedurePrefix ?? "";
+            string spSprocColumns = settings.MetaDataStoredProcName ?? "sp_sproc_columns";
             _requestContext = settings.RequestContext ?? new NullRequestContext();
-            _spSprocColumns = settings.MetaDataStoredProcName ?? "sp_sproc_columns";
+            _sqlCmdFactory = new SqlCommandFactory(storedProcedurePrefix, spSprocColumns);
         }
 
-        public string process(SqlConnection connection, string payload)
+        public string process(SqlConnection connection, String payload)
         {
-            JsonRpcRequest request = JsonConvert.DeserializeObject<JsonRpcRequest>(payload);
-            JObject response = new JObject();
+            return Process(connection, RequestFactory.Create(payload));
+        }
 
-
-            StoredProcInvoker proc = new StoredProcInvoker(_storedProcedurePrefix, _spSprocColumns);
-            response = proc.invoke(connection, CreateRequest(request));
+        public string Process(SqlConnection connection, IStoredProcRequest request)
+        {
+            StoredProcInvoker proc = new StoredProcInvoker(_sqlCmdFactory);
+            JObject response = proc.invoke(connection,RequestFactory.Create(_requestContext, request));
 
             return JsonConvert.SerializeObject(response, new JsonSerializerSettings { Formatting = Formatting.Indented });
-        }
-
-        private IStoredProcRequest CreateRequest(JsonRpcRequest jsonRequest)
-        {
-            return new StoredProcRequest(_requestContext, new JsonStoredProcRequest(jsonRequest));
         }
 
         private class NullRequestContext : IStoredProcRequest
         {
             string IStoredProcRequest.Method
+            {
+                get { return null; }
+            }
+
+            string IStoredProcRequest.AccessKey
             {
                 get { return null; }
             }
@@ -55,27 +56,6 @@ namespace CH.Alika.Json
             }
         }
 
-        private class StoredProcRequest : IStoredProcRequest
-        {
-            private IStoredProcRequest requestContext;
-            private IStoredProcRequest request;
-
-            public StoredProcRequest(IStoredProcRequest requestContext, IStoredProcRequest request)
-            {
-                this.requestContext = requestContext;
-                this.request = request;
-            }
-
-            string IStoredProcRequest.Method
-            {
-                get { return requestContext.Method ?? request.Method; }
-            }
-
-            IStoredProcParam IStoredProcRequest.CreateStoredProcParam(IStoredProcParamInfo stprocParamInfo)
-            {
-                return requestContext.CreateStoredProcParam(stprocParamInfo)
-                    ?? request.CreateStoredProcParam(stprocParamInfo);
-            }
-        }
+       
     }
 }
