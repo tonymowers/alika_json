@@ -52,7 +52,10 @@
     <Compile Include="Server\IStoredProcRequest.cs" />
     <Compile Include="Server\JsonStoredProcRequest.cs" />
     <Compile Include="Server\Model\DefaultFieldNameTranslator.cs" />
+    <Compile Include="Server\Model\IDataContainer.cs" />
     <Compile Include="Server\Model\IFieldNameTranslator.cs" />
+    <Compile Include="Server\Model\IRecordFactory.cs" />
+    <Compile Include="Server\Model\JObjectDataContainer.cs" />
     <Compile Include="Server\Model\JRecordAbstract.cs" />
     <Compile Include="Server\Model\JRecordArrayElement.cs" />
     <Compile Include="Server\Model\JRecordProperty.cs" />

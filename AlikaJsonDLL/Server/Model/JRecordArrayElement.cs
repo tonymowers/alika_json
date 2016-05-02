@@ -15,37 +15,11 @@ namespace CH.Alika.Json.Server.Model
            
         }
 
-        public override void ApplyTo(JObject parent)
+        public override void ApplyTo(IDataContainer parent)
         {
-            JObject jObject = new JObject();
-            base.ApplyTo(jObject);
-            if (jObject.HasValues)
-            {
-                JArray array = GetArray(parent, JsonPropertyName());
-                array.Add(jObject);
-            }
-
-        }
-
-        private static JArray GetArray(JObject parent, String objectName)
-        {
-            JArray array;
-            JToken token = parent.SelectToken(objectName);
-            if (token == null)
-            {
-                array = new JArray();
-                parent.Add(objectName, array);
-
-                return array;
-            }
-
-            if (token is JArray)
-            {
-                array = (JArray)token;
-                return array;
-            }
-
-            throw new Exception("Attempt to add array element to none array property [" + objectName + "]");
+            IDataContainer container = parent.CreateObject();
+            base.ApplyTo(container);
+            parent.AddToArray(JsonPropertyName(), container);
         }
 
         public override bool IsNotPartOfCollection()

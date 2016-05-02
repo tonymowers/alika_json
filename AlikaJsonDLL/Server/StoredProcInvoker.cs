@@ -14,15 +14,17 @@ namespace CH.Alika.Json.Server
     class StoredProcInvoker
     {
         private ISqlCommandFactory _sqlCmdFactory;
+        private IRecordFactory _recordFactory;
 
         public StoredProcInvoker(ISqlCommandFactory sqlCmdFactory)
         {
             this._sqlCmdFactory = sqlCmdFactory;
+            this._recordFactory = new JRecordFactory();
         }
 
         public JObject invoke(SqlConnection connection, IStoredProcRequest request)
         {
-            JObject response = new JObject();
+            JObjectDataContainer response = new JObjectDataContainer();
             using (var cmd = _sqlCmdFactory.CreateSqlCommand(connection, request))
             {
                 using (SqlDataReader reader = cmd.ExecuteReader())
@@ -34,14 +36,14 @@ namespace CH.Alika.Json.Server
                 }
             }
 
-            return response;
+            return response.JObject;
         }
 
-        private void ApplyResultToJObject(JObject response, SqlDataReader reader)
+        private void ApplyResultToJObject(IDataContainer response, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                JRecord jsonRecord = JRecordFactory.create(reader);
+                JRecord jsonRecord = _recordFactory.create(reader);
                 jsonRecord.ApplyTo(response);
                 if (jsonRecord.IsNotPartOfCollection())
                     break;

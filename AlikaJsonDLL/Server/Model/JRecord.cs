@@ -8,7 +8,7 @@ namespace CH.Alika.Json.Server.Model
 {
     interface JRecord
     {
-        void ApplyTo(JObject parent);
+        void ApplyTo(IDataContainer parent);
         bool IsNotPartOfCollection();
     }
 }

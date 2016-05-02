@@ -15,12 +15,12 @@ namespace CH.Alika.Json.Server.Model
         {
         }
 
-        public override void ApplyTo(JObject parent)
+        public override void ApplyTo(IDataContainer parent)
         {
-            JObject propertyObject = new JObject();
+            IDataContainer propertyObject = parent.CreateObject();
             base.ApplyTo(propertyObject);
             if (propertyObject.HasValues)
-                parent.Add(JsonPropertyName(), propertyObject);
+                parent.AddObject(JsonPropertyName(), propertyObject);
         }
 
         public override bool IsNotPartOfCollection()

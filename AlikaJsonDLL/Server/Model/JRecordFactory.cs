@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Data;
 
 namespace CH.Alika.Json.Server.Model
 {
-    class JRecordFactory
+    class JRecordFactory : IRecordFactory
     {
         private enum RecordType
         {
@@ -13,67 +14,39 @@ namespace CH.Alika.Json.Server.Model
             ARRAY_ELEMENT
         };
 
-        public string GetJsonPathFromStprocVariableName(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsPropertyNameField(string fieldName)
-        {
-            return "_".Equals(fieldName);
-        }
-
-        public String[] GetJsonPathFromRecordFieldName(string path)
-        {
-            String[] split = path.Split('_');
-
-            for (int i = 0; i < split.Length; i++)
-            {
-                split[i] = FirstCharacterToLower(split[i]);
-            }
-
-            return split;
-        }
-
-        public string GetPropertyName(IDataRecord record)
-        {
-            return GetJsonPathFromRecordFieldName(record["_"].ToString().Replace("[]", "")).Last();
-        }
-
-        private static string FirstCharacterToLower(string str)
-        {
-            if (String.IsNullOrEmpty(str) || Char.IsLower(str, 0))
-                return str;
-
-            return Char.ToLowerInvariant(str[0]).ToString() + str.Substring(1);
-        }
-
-
-
-        public bool IsIgnoredField(IDataRecord record, int i)
-        {
-            if (IsPropertyNameField(record.GetName(i)))
-                return true;
-
-            return DBNull.Value.Equals(record.GetValue(i));
-        }
-        public static JRecord create(IDataRecord record)
+        
+        public JRecord create(IDataRecord record)
         {
             JRecord result;
             switch (GetRecordType(record))
             {
                 case RecordType.ARRAY_ELEMENT:
-                    result = new JRecordArrayElement(record);
+                    result = CreateArrayElement(record);
                     break;
                 case RecordType.PROPERTY:
-                    result = new JRecordProperty(record);
+                    result = CreateProperty(record);
                     break;
                 default:
-                    result = new JRecordSelf(record);
+                    result = CreateSelfReference(record);
                     break;
             }
 
             return result;
+        }
+
+        protected JRecord CreateArrayElement(IDataRecord record)
+        {
+            return new JRecordProperty(record);
+        }
+
+        protected JRecord CreateProperty(IDataRecord record)
+        {
+            return new JRecordArrayElement(record);
+        }
+
+        protected JRecord CreateSelfReference(IDataRecord record)
+        {
+            return new JRecordSelf(record);
         }
 
         private static RecordType GetRecordType(IDataRecord record)
