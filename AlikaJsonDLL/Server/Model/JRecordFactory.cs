@@ -11,15 +11,19 @@ namespace CH.Alika.Json.Server.Model
         {
             SELF,
             PROPERTY,
-            ARRAY_ELEMENT
+            ARRAY_ELEMENT,
+            OPTIONS
         };
 
         
-        public JRecord create(IDataRecord record)
+        public IRecord Create(IDataRecord record)
         {
-            JRecord result;
+            IRecord result;
             switch (GetRecordType(record))
             {
+                case RecordType.OPTIONS:
+                    result = CreateOptions(record);
+                    break;
                 case RecordType.ARRAY_ELEMENT:
                     result = CreateArrayElement(record);
                     break;
@@ -34,23 +38,33 @@ namespace CH.Alika.Json.Server.Model
             return result;
         }
 
-        protected JRecord CreateArrayElement(IDataRecord record)
+        private IRecord CreateOptions(IDataRecord record)
         {
-            return new JRecordProperty(record);
+            return new RecordOptions(record);
         }
 
-        protected JRecord CreateProperty(IDataRecord record)
+        protected IRecord CreateArrayElement(IDataRecord record)
         {
-            return new JRecordArrayElement(record);
+            return new RecordProperty(record);
         }
 
-        protected JRecord CreateSelfReference(IDataRecord record)
+        protected IRecord CreateProperty(IDataRecord record)
         {
-            return new JRecordSelf(record);
+            return new RecordArrayElement(record);
+        }
+
+        protected IRecord CreateSelfReference(IDataRecord record)
+        {
+            return new RecordSelf(record);
         }
 
         private static RecordType GetRecordType(IDataRecord record)
         {
+            if (IsOptionsRecord(record))
+            {
+                return RecordType.OPTIONS;
+            }
+
             if (!IsNewObjectRecord(record))
             {
                 return RecordType.SELF;
@@ -62,6 +76,13 @@ namespace CH.Alika.Json.Server.Model
             }
 
             return RecordType.PROPERTY;
+        }
+
+        private static bool IsOptionsRecord(IDataRecord record)
+        {
+            return record.GetName(0).Equals("_") &&
+                record["_"] != null &&
+                record["_"].ToString().Equals("+");
         }
 
         private static bool IsNewObjectRecord(IDataRecord record)

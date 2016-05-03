@@ -1,4 +1,5 @@
-﻿using System.Data.SqlClient;
+﻿using System;
+using System.Data.SqlClient;
 using System.IO;
 using CH.Alika.Json.Server.Model;
 using Newtonsoft.Json;
@@ -26,23 +27,32 @@ namespace CH.Alika.Json.Server
                 {
                     do
                     {
-                        ApplyResultToJObject(response, reader);
+                        IOptions options = ApplyResultToJObject(response, reader);
+                        if (options != null)
+                        {
+                            // TODO: convert to streaming json
+                            
+                        }
                     } while (reader.NextResult());
                 }
             }
 
-            SerializeObject(response,writer);
+            SerializeObject(response.ObjectRepresentation,writer);
         }
 
-        private void ApplyResultToJObject(IDataContainer response, SqlDataReader reader)
+        private IOptions ApplyResultToJObject(IDataContainer response, SqlDataReader reader)
         {
             while (reader.Read())
             {
-                JRecord jsonRecord = _recordFactory.create(reader);
+                IRecord jsonRecord = _recordFactory.Create(reader);
+                if (jsonRecord is IOptions)
+                    return jsonRecord as IOptions;
+
                 jsonRecord.ApplyTo(response);
                 if (jsonRecord.IsNotPartOfCollection())
                     break;
             }
+            return null;
         }
 
 

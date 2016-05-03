@@ -16,5 +16,7 @@ namespace CH.Alika.Json.Server.Model
         {
             get;
         }
+
+        object ObjectRepresentation { get; }
     }
 }

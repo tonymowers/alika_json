@@ -4,6 +4,6 @@ namespace CH.Alika.Json.Server.Model
 {
     interface IRecordFactory
     {
-        JRecord create(IDataRecord record);
+        IRecord Create(IDataRecord record);
     }
 }

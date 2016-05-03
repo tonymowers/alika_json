@@ -8,8 +8,8 @@ namespace CH.Alika.Json.Server.Model
 {
     class JObjectDataContainer : IDataContainer
     {
-        private JObject _jobject;
-        private IFieldNameTranslator fieldNameXlator = new DefaultFieldNameTranslator();
+        private readonly JObject _jobject;
+        private readonly IFieldNameTranslator _fieldNameXlator = new DefaultFieldNameTranslator();
 
         public JObjectDataContainer()
         {
@@ -24,6 +24,11 @@ namespace CH.Alika.Json.Server.Model
         public bool HasValues 
         {
             get { return _jobject.HasValues; }
+        }
+
+        public object ObjectRepresentation
+        {
+            get { return _jobject; }
         }
 
         public IDataContainer CreateObject()
@@ -50,7 +55,7 @@ namespace CH.Alika.Json.Server.Model
         public void AddProperty(string name, object value)
         {
             JContainer container;
-            String[] path = fieldNameXlator.RecordFieldNameToJsonPath(name);
+            String[] path = _fieldNameXlator.RecordFieldNameToJsonPath(name);
             if (path.Length == 2)
             {
                 JToken token = _jobject.SelectToken(path[0]);
