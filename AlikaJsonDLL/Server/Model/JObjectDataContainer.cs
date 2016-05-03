@@ -14,11 +14,6 @@ namespace CH.Alika.Json.Server.Model
             _jobject = new JObject();
         }
 
-        public JObject JObject
-        {
-            get { return _jobject; }
-        }
-
         public bool HasValues 
         {
             get { return _jobject.HasValues; }
