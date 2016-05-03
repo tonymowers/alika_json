@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace CH.Alika.Json.Server.Model
@@ -13,7 +11,7 @@ namespace CH.Alika.Json.Server.Model
 
         public JObjectDataContainer()
         {
-            this._jobject = new JObject();
+            _jobject = new JObject();
         }
 
         public JObject JObject
@@ -41,40 +39,45 @@ namespace CH.Alika.Json.Server.Model
             JObjectDataContainer container = (JObjectDataContainer)data;
             if (container.HasValues)
             {
-                JArray array = GetArray(_jobject, name);
+                JArray array = GetArray(name);
                 array.Add(container._jobject);
             }
         }
 
         public void AddObject(string name, IDataContainer data)
         {
+            String objectName = _fieldNameXlator.RecordFieldNameToJsonPath(name).Last();
             JObjectDataContainer container = (JObjectDataContainer)data;
-            _jobject.Add(name, container._jobject);
+            GetContainer(name).Add(objectName, container._jobject);
         }
 
         public void AddProperty(string name, object value)
         {
-            JContainer container;
+            String propertyName = _fieldNameXlator.RecordFieldNameToJsonPath(name).Last();
+            AddPropertyTo(GetContainer(name), new JProperty(propertyName, value));
+        }
+
+        private JObject GetContainer(string name)
+        {
+            JObject container = _jobject;
             String[] path = _fieldNameXlator.RecordFieldNameToJsonPath(name);
-            if (path.Length == 2)
+            int i = 1;
+            while (i < path.Length)
             {
-                JToken token = _jobject.SelectToken(path[0]);
+                JToken token = _jobject.SelectToken(path[i - 1]);
                 if (token == null)
                 {
-                    container = new JObject();
-                    _jobject.Add(path[0], container);
+                    JObject newContainer = new JObject();
+                    if (container != null) container.Add(path[i - 1], newContainer);
+                    container = newContainer;
                 }
                 else
                 {
-                    container = (JContainer)token;
+                    container = token as JObject;
                 }
+                i++;
             }
-            else
-            {
-                container = _jobject;
-            }
-
-            AddPropertyTo(container, new JProperty(path.Last(), value));
+            return container;
         }
 
         // Adds a property to a container
@@ -83,6 +86,7 @@ namespace CH.Alika.Json.Server.Model
         {
             JProperty oldProperty = null;
 
+            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (JToken el in container.Children())
             {
                 if (!(el is JProperty))
@@ -90,7 +94,7 @@ namespace CH.Alika.Json.Server.Model
 
                 JProperty p = el as JProperty;
 
-                if (p != null && newProperty.Name.Equals(p.Name))
+                if (newProperty.Name.Equals(p.Name))
                 {
                     oldProperty = p;
                     break;
@@ -102,25 +106,25 @@ namespace CH.Alika.Json.Server.Model
             container.Add(newProperty);
         }
 
-        private static JArray GetArray(JObject parent, String objectName)
+        private JArray GetArray(String name)
         {
-            JArray array;
-            JToken token = parent.SelectToken(objectName);
+            String arrayName = _fieldNameXlator.RecordFieldNameToJsonPath(name).Last();
+            JObject container = GetContainer(name);
+            JToken token = container.SelectToken(arrayName);
             if (token == null)
             {
-                array = new JArray();
-                parent.Add(objectName, array);
+                JArray array = new JArray();
+                container.Add(arrayName, array);
 
                 return array;
             }
 
             if (token is JArray)
             {
-                array = (JArray)token;
-                return array;
+                return token as JArray;
             }
 
-            throw new Exception("Attempt to add array element to none array property [" + objectName + "]");
+            throw new Exception("Attempt to add array element to non-array property [" + name + "]");
         }
     }
 }

@@ -49,7 +49,7 @@ namespace CH.Alika.Json.Server.Model
 
         public string JsonPropertyName(IDataRecord record)
         {
-            return RecordFieldNameToJsonPath(record["_"].ToString().Replace("[]", "")).Last();
+            return record["_"].ToString().Replace("[]", "");
         }
 
         public bool IsIgnoredFieldForJson(IDataRecord record, int i)

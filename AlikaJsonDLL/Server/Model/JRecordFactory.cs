@@ -65,7 +65,7 @@ namespace CH.Alika.Json.Server.Model
                 return RecordType.Options;
             }
 
-            if (IsObjectRecord(record))
+            if (IsNewObjectRecord(record))
             {
                 return RecordType.NewObject;
             }
@@ -85,11 +85,18 @@ namespace CH.Alika.Json.Server.Model
                 record["_"].ToString().Equals("+");
         }
 
-        private static bool IsObjectRecord(IDataRecord record)
+        private static bool IsNewObjectRecord(IDataRecord record)
         {
-            return record.GetName(0).Equals("_") &&
-                record["_"] != null &&
-                !record["_"].ToString().EndsWith("[]");
+            if ("_".Equals(record.GetName(0)) && record["_"] != null)
+            {
+                string objectName = record["_"].ToString();
+                return objectName.Length > 0 &&
+                       !objectName.EndsWith("[]") &&
+                       !".".Equals(objectName.ToString());
+            }
+
+            return false;
+            
         }
 
         private static bool IsArrayElementRecord(IDataRecord record)
