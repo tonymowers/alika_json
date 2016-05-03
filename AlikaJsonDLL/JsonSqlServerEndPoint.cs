@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Data.SqlClient;
-using System.Data;
-using Newtonsoft.Json;
-using System.Collections;
-using Newtonsoft.Json.Linq;
-using CH.Alika.Json.Shared.Model;
+using System.Globalization;
+using System.IO;
 using CH.Alika.Json.Server;
 
 namespace CH.Alika.Json
@@ -25,6 +20,7 @@ namespace CH.Alika.Json
             _sqlCmdFactory = new SqlCommandFactory(storedProcedurePrefix, spSprocColumns);
         }
 
+        // ReSharper disable once InconsistentNaming
         public string process(SqlConnection connection, String payload)
         {
             return Process(connection, RequestFactory.Create(payload));
@@ -32,10 +28,16 @@ namespace CH.Alika.Json
 
         public string Process(SqlConnection connection, IStoredProcRequest request)
         {
-            StoredProcInvoker proc = new StoredProcInvoker(_sqlCmdFactory);
-            JObject response = proc.invoke(connection,RequestFactory.Create(_requestContext, request));
+            StringBuilder sb = new StringBuilder(1024);
+            StringWriter sw = new StringWriter(sb, CultureInfo.InvariantCulture);
+            Process(connection, request, sw);
+            return sw.ToString();
+        }
 
-            return JsonConvert.SerializeObject(response, new JsonSerializerSettings { Formatting = Formatting.Indented });
+        public void Process(SqlConnection connection, IStoredProcRequest request, TextWriter writer)
+        {
+            StoredProcInvoker proc = new StoredProcInvoker(_sqlCmdFactory);
+            proc.Invoke(connection, RequestFactory.Create(_requestContext, request),writer);
         }
 
         private class NullRequestContext : IStoredProcRequest
@@ -56,6 +58,5 @@ namespace CH.Alika.Json
             }
         }
 
-       
     }
 }

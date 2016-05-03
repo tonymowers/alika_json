@@ -1,28 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Newtonsoft.Json.Linq;
-using System.Data.SqlClient;
-using System.Data;
-using CH.Alika.Json.Shared.Model;
+﻿using System.Data.SqlClient;
+using System.IO;
 using CH.Alika.Json.Server.Model;
+using Newtonsoft.Json;
 
 namespace CH.Alika.Json.Server
 {
    
     class StoredProcInvoker
     {
-        private ISqlCommandFactory _sqlCmdFactory;
-        private IRecordFactory _recordFactory;
+        private readonly ISqlCommandFactory _sqlCmdFactory;
+        private readonly IRecordFactory _recordFactory;
 
         public StoredProcInvoker(ISqlCommandFactory sqlCmdFactory)
         {
-            this._sqlCmdFactory = sqlCmdFactory;
-            this._recordFactory = new JRecordFactory();
+            _sqlCmdFactory = sqlCmdFactory;
+            _recordFactory = new JRecordFactory();
         }
 
-        public JObject invoke(SqlConnection connection, IStoredProcRequest request)
+        public void Invoke(SqlConnection connection, IStoredProcRequest request, TextWriter writer)
         {
             JObjectDataContainer response = new JObjectDataContainer();
             using (var cmd = _sqlCmdFactory.CreateSqlCommand(connection, request))
@@ -36,7 +31,7 @@ namespace CH.Alika.Json.Server
                 }
             }
 
-            return response.JObject;
+            SerializeObject(response,writer);
         }
 
         private void ApplyResultToJObject(IDataContainer response, SqlDataReader reader)
@@ -49,6 +44,19 @@ namespace CH.Alika.Json.Server
                     break;
             }
         }
-      
+
+
+        private static void SerializeObject(object value, TextWriter writer)
+        {
+            JsonSerializer jsonSerializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
+
+            using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
+            {
+                jsonWriter.Formatting = jsonSerializer.Formatting;
+
+                jsonSerializer.Serialize(jsonWriter, value);
+            }
+        }
+
     }
 }
