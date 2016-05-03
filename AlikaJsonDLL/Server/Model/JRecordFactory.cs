@@ -9,10 +9,10 @@ namespace CH.Alika.Json.Server.Model
     {
         private enum RecordType
         {
-            SELF,
-            PROPERTY,
-            ARRAY_ELEMENT,
-            OPTIONS
+            NewObject,
+            Self,
+            ArrayElement,
+            Options
         };
 
         
@@ -21,17 +21,17 @@ namespace CH.Alika.Json.Server.Model
             IRecord result;
             switch (GetRecordType(record))
             {
-                case RecordType.OPTIONS:
+                case RecordType.Options:
                     result = CreateOptions(record);
                     break;
-                case RecordType.ARRAY_ELEMENT:
+                case RecordType.ArrayElement:
                     result = CreateArrayElement(record);
                     break;
-                case RecordType.PROPERTY:
-                    result = CreateProperty(record);
+                case RecordType.NewObject:
+                    result = CreateNewObjectRecord(record);
                     break;
                 default:
-                    result = CreateSelfReference(record);
+                    result = CreateSelfRecord(record);
                     break;
             }
 
@@ -45,15 +45,15 @@ namespace CH.Alika.Json.Server.Model
 
         protected IRecord CreateArrayElement(IDataRecord record)
         {
-            return new RecordProperty(record);
-        }
-
-        protected IRecord CreateProperty(IDataRecord record)
-        {
             return new RecordArrayElement(record);
         }
 
-        protected IRecord CreateSelfReference(IDataRecord record)
+        protected IRecord CreateNewObjectRecord(IDataRecord record)
+        {
+            return new RecordNewObject(record);
+        }
+
+        protected IRecord CreateSelfRecord(IDataRecord record)
         {
             return new RecordSelf(record);
         }
@@ -62,20 +62,20 @@ namespace CH.Alika.Json.Server.Model
         {
             if (IsOptionsRecord(record))
             {
-                return RecordType.OPTIONS;
+                return RecordType.Options;
             }
 
-            if (!IsNewObjectRecord(record))
+            if (IsObjectRecord(record))
             {
-                return RecordType.SELF;
+                return RecordType.NewObject;
             }
 
             if (IsArrayElementRecord(record))
             {
-                return RecordType.ARRAY_ELEMENT;
+                return RecordType.ArrayElement;
             }
 
-            return RecordType.PROPERTY;
+            return RecordType.Self;
         }
 
         private static bool IsOptionsRecord(IDataRecord record)
@@ -85,9 +85,11 @@ namespace CH.Alika.Json.Server.Model
                 record["_"].ToString().Equals("+");
         }
 
-        private static bool IsNewObjectRecord(IDataRecord record)
+        private static bool IsObjectRecord(IDataRecord record)
         {
-            return record.GetName(0).Equals("_");
+            return record.GetName(0).Equals("_") &&
+                record["_"] != null &&
+                !record["_"].ToString().EndsWith("[]");
         }
 
         private static bool IsArrayElementRecord(IDataRecord record)

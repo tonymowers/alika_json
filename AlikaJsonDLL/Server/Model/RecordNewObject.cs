@@ -7,10 +7,10 @@ using System.Data;
 
 namespace CH.Alika.Json.Server.Model
 {
-    class RecordProperty : RecordAbstract
+    class RecordNewObject : RecordAbstract
     {
 
-        public RecordProperty(IDataRecord record)
+        public RecordNewObject(IDataRecord record)
             : base(record)
         {
         }
