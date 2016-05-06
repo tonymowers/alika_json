@@ -7,16 +7,14 @@ namespace CH.Alika.Json.Server.Model
 {
     interface IDataContainer
     {
-        void AddObject(string name, IDataContainer container);
+        IDataContainer CreateObject(string name);
+        IDataContainer CreateArrayElement(string name);
+        void AddObject(IDataContainer container);
         void AddProperty(string name, object value);
-        void AddToArray(string name, IDataContainer value);
-
-        IDataContainer CreateObject();
-        bool HasValues
-        {
-            get;
-        }
 
         object ObjectRepresentation { get; }
+
+        bool IsSerializable { get; }
+        void End();
     }
 }

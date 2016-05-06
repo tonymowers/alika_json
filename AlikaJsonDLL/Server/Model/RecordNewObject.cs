@@ -17,10 +17,9 @@ namespace CH.Alika.Json.Server.Model
 
         public override void ApplyTo(IDataContainer parent)
         {
-            IDataContainer propertyObject = parent.CreateObject();
-            base.ApplyTo(propertyObject);
-            if (propertyObject.HasValues)
-                parent.AddObject(JsonPropertyName(), propertyObject);
+            IDataContainer newObject = parent.CreateObject(JsonPropertyName());
+            base.ApplyTo(newObject);
+            parent.AddObject(newObject);
         }
 
         public override bool IsNotPartOfCollection()

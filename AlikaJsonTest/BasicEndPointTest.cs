@@ -76,6 +76,24 @@ namespace CH.Alika.Json.Test
         }
 
         [Test]
+        public void Dataset()
+        {
+            JsonRpcRequest rpcRequest = new JsonRpcRequest
+            {
+                ApiVersion = "1.0",
+                Method = "stproc_test_Dataset"
+            };
+            string response;
+            using (var connection = OpenConnection())
+            {
+                string request = JsonConvert.SerializeObject(rpcRequest);
+                response = _endpoint.process(connection, request);
+            }
+            Console.Out.WriteLine(response);
+            Console.Out.WriteLine("done");
+        }
+
+        [Test]
         public void ObjectUpdate()
         {
             UserData user = new UserData

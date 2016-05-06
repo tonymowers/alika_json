@@ -35,6 +35,11 @@ namespace CH.Alika.Json.Server.Model
             return sb.ToString();
         }
 
+        public String RecordFieldNameToPropertyName(string path)
+        {
+            return RecordFieldNameToJsonPath(path).Last();
+        }
+
         public String[] RecordFieldNameToJsonPath(string path)
         {
             String[] split = path.Split('_');

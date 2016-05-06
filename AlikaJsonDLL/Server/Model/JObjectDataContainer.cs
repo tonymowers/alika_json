@@ -1,20 +1,30 @@
 ﻿using System;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace CH.Alika.Json.Server.Model
 {
-    class JObjectDataContainer : IDataContainer
+    internal class JObjectDataContainer : IDataContainer
     {
-        private readonly JObject _jobject;
         private readonly IFieldNameTranslator _fieldNameXlator = new DefaultFieldNameTranslator();
+        private readonly bool _isArray;
+        private readonly JObject _jobject;
+        private readonly string _name;
 
         public JObjectDataContainer()
         {
+            _name = null;
+            _isArray = false;
             _jobject = new JObject();
         }
 
-        public bool HasValues 
+        private JObjectDataContainer(string name, bool isArray)
+        {
+            _isArray = isArray;
+            _name = name;
+            _jobject = new JObject();
+        }
+
+        private bool HasValues
         {
             get { return _jobject.HasValues; }
         }
@@ -24,45 +34,61 @@ namespace CH.Alika.Json.Server.Model
             get { return _jobject; }
         }
 
-        public IDataContainer CreateObject()
+        public bool IsSerializable
         {
-            return new JObjectDataContainer();
+            get { return true; }
         }
 
-        public void AddToArray(string name, IDataContainer data)
+        public void End()
         {
-            JObjectDataContainer container = (JObjectDataContainer)data;
-            if (container.HasValues)
+            // nothing to do
+        }
+
+        public IDataContainer CreateArrayElement(string name)
+        {
+            return new JObjectDataContainer(name, true);
+        }
+
+        public IDataContainer CreateObject(string name)
+        {
+            return new JObjectDataContainer(name, false);
+        }
+
+        public void AddObject(IDataContainer data)
+        {
+            var container = (JObjectDataContainer) data;
+            if (!container.HasValues)
+                return;
+
+            if (container._isArray)
             {
-                JArray array = GetArray(name);
+                var array = GetArray(container._name);
                 array.Add(container._jobject);
             }
-        }
-
-        public void AddObject(string name, IDataContainer data)
-        {
-            String objectName = _fieldNameXlator.RecordFieldNameToJsonPath(name).Last();
-            JObjectDataContainer container = (JObjectDataContainer)data;
-            GetContainer(name).Add(objectName, container._jobject);
+            else
+            {
+                var objectName = _fieldNameXlator.RecordFieldNameToPropertyName(container._name);
+                GetContainer(container._name).Add(objectName, container._jobject);
+            }
         }
 
         public void AddProperty(string name, object value)
         {
-            String propertyName = _fieldNameXlator.RecordFieldNameToJsonPath(name).Last();
+            var propertyName = _fieldNameXlator.RecordFieldNameToPropertyName(name);
             AddPropertyTo(GetContainer(name), new JProperty(propertyName, value));
         }
 
         private JObject GetContainer(string name)
         {
-            JObject container = _jobject;
-            String[] path = _fieldNameXlator.RecordFieldNameToJsonPath(name);
-            int i = 1;
+            var container = _jobject;
+            var path = _fieldNameXlator.RecordFieldNameToJsonPath(name);
+            var i = 1;
             while (i < path.Length)
             {
-                JToken token = _jobject.SelectToken(path[i - 1]);
+                var token = _jobject.SelectToken(path[i - 1]);
                 if (token == null)
                 {
-                    JObject newContainer = new JObject();
+                    var newContainer = new JObject();
                     if (container != null) container.Add(path[i - 1], newContainer);
                     container = newContainer;
                 }
@@ -82,12 +108,12 @@ namespace CH.Alika.Json.Server.Model
             JProperty oldProperty = null;
 
             // ReSharper disable once LoopCanBeConvertedToQuery
-            foreach (JToken el in container.Children())
+            foreach (var el in container.Children())
             {
                 if (!(el is JProperty))
                     continue;
 
-                JProperty p = el as JProperty;
+                var p = el as JProperty;
 
                 if (newProperty.Name.Equals(p.Name))
                 {
@@ -101,14 +127,14 @@ namespace CH.Alika.Json.Server.Model
             container.Add(newProperty);
         }
 
-        private JArray GetArray(String name)
+        private JArray GetArray(string name)
         {
-            String arrayName = _fieldNameXlator.RecordFieldNameToJsonPath(name).Last();
-            JObject container = GetContainer(name);
-            JToken token = container.SelectToken(arrayName);
+            var arrayName = _fieldNameXlator.RecordFieldNameToPropertyName(name);
+            var container = GetContainer(name);
+            var token = container.SelectToken(arrayName);
             if (token == null)
             {
-                JArray array = new JArray();
+                var array = new JArray();
                 container.Add(arrayName, array);
 
                 return array;

@@ -18,6 +18,8 @@ namespace CH.Alika.Json.Server.Model
         // outbound json messages
         string[] RecordFieldNameToJsonPath(string fieldName);
 
+        string RecordFieldNameToPropertyName(string fieldName);
+
         // Json property name into which the record
         // data should be applied to in the Json outbound message
         string JsonPropertyName(IDataRecord record);

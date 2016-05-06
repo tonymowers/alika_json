@@ -20,7 +20,8 @@ namespace CH.Alika.Json.Server
 
         public void Invoke(SqlConnection connection, IStoredProcRequest request, TextWriter writer)
         {
-            JObjectDataContainer response = new JObjectDataContainer();
+            bool optionsSet = false;
+            IDataContainer response = new JObjectDataContainer();
             using (var cmd = _sqlCmdFactory.CreateSqlCommand(connection, request))
             {
                 using (SqlDataReader reader = cmd.ExecuteReader())
@@ -28,16 +29,19 @@ namespace CH.Alika.Json.Server
                     do
                     {
                         IOptions options = ApplyResultToJObject(response, reader);
-                        if (options != null)
+                        if (!optionsSet && options != null)
                         {
-                            // TODO: convert to streaming json
-                            
+                            optionsSet = true;
+                            response = new StreamedRootDataContainer(writer,true);
                         }
                     } while (reader.NextResult());
                 }
             }
 
-            SerializeObject(response.ObjectRepresentation,writer);
+            if (response.IsSerializable)
+                SerializeObject(response.ObjectRepresentation,writer);
+
+            response.End();
         }
 
         private IOptions ApplyResultToJObject(IDataContainer response, SqlDataReader reader)

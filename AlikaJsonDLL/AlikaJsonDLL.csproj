@@ -65,6 +65,7 @@
     <Compile Include="Server\Model\JRecordFactory.cs" />
     <Compile Include="Server\Model\RecordSelf.cs" />
     <Compile Include="JsonSqlServerEndPoint.cs" />
+    <Compile Include="Server\Model\StreamedRootDataContainer.cs" />
     <Compile Include="Server\SqlCommandFactory.cs" />
     <Compile Include="Server\StoredProcInvoker.cs" />
     <Compile Include="Server\JsonStoredProcParam.cs" />
