@@ -54,6 +54,9 @@ namespace CH.Alika.Json.Server.Model
 
         public string JsonPropertyName(IDataRecord record)
         {
+            if (!record.GetName(0).Equals("_"))
+                return "";
+
             return record["_"].ToString().Replace("[]", "");
         }
 

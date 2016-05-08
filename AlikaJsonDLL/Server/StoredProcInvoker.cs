@@ -15,7 +15,7 @@ namespace CH.Alika.Json.Server
         public StoredProcInvoker(ISqlCommandFactory sqlCmdFactory)
         {
             _sqlCmdFactory = sqlCmdFactory;
-            _recordFactory = new JRecordFactory();
+            _recordFactory = new RecordFactory();
         }
 
         public void Invoke(SqlConnection connection, IStoredProcRequest request, TextWriter writer)
@@ -28,7 +28,7 @@ namespace CH.Alika.Json.Server
                 {
                     do
                     {
-                        IOptions options = ApplyResultToJObject(response, reader);
+                        IOptions options = ApplyResultToJObject(response, reader,optionsSet);
                         if (!optionsSet && options != null)
                         {
                             optionsSet = true;
@@ -44,11 +44,11 @@ namespace CH.Alika.Json.Server
             response.End();
         }
 
-        private IOptions ApplyResultToJObject(IDataContainer response, SqlDataReader reader)
+        private IOptions ApplyResultToJObject(IDataContainer response, SqlDataReader reader,bool arrayElemntsOnly)
         {
             while (reader.Read())
             {
-                IRecord jsonRecord = _recordFactory.Create(reader);
+                var jsonRecord = arrayElemntsOnly ? _recordFactory.CreateArrayElement(reader) : _recordFactory.Create(reader);
                 if (jsonRecord is IOptions)
                     return jsonRecord as IOptions;
 

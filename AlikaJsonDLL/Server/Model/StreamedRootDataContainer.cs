@@ -16,8 +16,7 @@ namespace CH.Alika.Json.Server.Model
             _isArray = isArray;
             if (textWriter != null)
             {
-                _writer = new JsonTextWriter(textWriter);
-                _writer.Formatting = Formatting.Indented;
+                _writer = new JsonTextWriter(textWriter) {Formatting = Formatting.Indented};
                 if (_isArray)
                     _writer.WriteStartArray();
                 else

@@ -62,7 +62,7 @@
     <Compile Include="Server\Model\RecordOptions.cs" />
     <Compile Include="Server\Model\RecordNewObject.cs" />
     <Compile Include="Server\Model\IRecord.cs" />
-    <Compile Include="Server\Model\JRecordFactory.cs" />
+    <Compile Include="Server\Model\RecordFactory.cs" />
     <Compile Include="Server\Model\RecordSelf.cs" />
     <Compile Include="JsonSqlServerEndPoint.cs" />
     <Compile Include="Server\Model\StreamedRootDataContainer.cs" />
