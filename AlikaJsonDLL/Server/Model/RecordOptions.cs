@@ -9,7 +9,7 @@ namespace CH.Alika.Json.Server.Model
     class RecordOptions : IRecord, IOptions
     {
         private readonly IFieldNameTranslator _fieldNameXlator = new DefaultFieldNameTranslator();
-        private Dictionary<string, string> _options = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _options = new Dictionary<string, string>();
 
         public RecordOptions(IDataRecord record)
         {
@@ -33,5 +33,6 @@ namespace CH.Alika.Json.Server.Model
         }
 
         public bool IsArray { get { return !_options.ContainsKey("isarray") || "1".Equals(_options["isarray"]); }}
+        public bool IsFormatted { get { return !_options.ContainsKey("isformatted") || "1".Equals(_options["isformatted"]); } }
     }
 }

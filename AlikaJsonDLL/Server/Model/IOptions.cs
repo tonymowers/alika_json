@@ -3,5 +3,6 @@
     public interface IOptions
     {
         bool IsArray { get; }
+        bool IsFormatted { get; }
     }
 }

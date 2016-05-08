@@ -4,19 +4,19 @@ using Newtonsoft.Json;
 
 namespace CH.Alika.Json.Server.Model
 {
-    internal class StreamedRootDataContainer : IDataContainer
+    internal class StreamedDataContainer : IDataContainer
     {
         private readonly IFieldNameTranslator _fieldNameXlator = new DefaultFieldNameTranslator();
         private readonly JsonTextWriter _writer;
         private string _arrayName;
         private readonly bool _isArray;
 
-        public StreamedRootDataContainer(TextWriter textWriter, bool isArray = false)
+        public StreamedDataContainer(TextWriter textWriter, bool isArray = false, bool isFormatted = false)
         {
             _isArray = isArray;
             if (textWriter != null)
             {
-                _writer = new JsonTextWriter(textWriter) {Formatting = Formatting.None};
+                _writer = new JsonTextWriter(textWriter) {Formatting = isFormatted ? Formatting.Indented : Formatting.None};
                 if (_isArray)
                     _writer.WriteStartArray();
                 else
@@ -24,7 +24,7 @@ namespace CH.Alika.Json.Server.Model
             }
         }
 
-        private StreamedRootDataContainer(JsonTextWriter textWriter)
+        private StreamedDataContainer(JsonTextWriter textWriter)
         {
             if (textWriter != null)
             {
@@ -61,7 +61,7 @@ namespace CH.Alika.Json.Server.Model
                 _writer.WriteStartArray();
             }
 
-            return new StreamedRootDataContainer(_writer);
+            return new StreamedDataContainer(_writer);
         }
 
         public IDataContainer CreateObject(string name)
@@ -74,7 +74,7 @@ namespace CH.Alika.Json.Server.Model
                 _writer.WritePropertyName(PropertyName(name));
             }
 
-            return new StreamedRootDataContainer(_writer);
+            return new StreamedDataContainer(_writer);
         }
 
         public object ObjectRepresentation

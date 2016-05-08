@@ -33,7 +33,7 @@ namespace CH.Alika.Json.Server
                         // apply options
                         optionsSet = true;
                         isArray = options.IsArray;
-                        response = new StreamedRootDataContainer(writer, isArray);
+                        response = new StreamedRootDataContainer(writer, isArray,options.IsFormatted);
                     } while (reader.NextResult());
                 }
             }
