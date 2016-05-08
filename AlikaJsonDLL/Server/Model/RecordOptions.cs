@@ -8,12 +8,20 @@ namespace CH.Alika.Json.Server.Model
 {
     class RecordOptions : IRecord, IOptions
     {
-        private IDataRecord _record;
+        private readonly IFieldNameTranslator _fieldNameXlator = new DefaultFieldNameTranslator();
+        private Dictionary<string, string> _options = new Dictionary<string, string>();
 
         public RecordOptions(IDataRecord record)
         {
-            _record = record;
+            for (int i = 0; i < record.FieldCount; i++)
+            {
+                if (_fieldNameXlator.IsIgnoredFieldForJson(record, i))
+                    continue;
+
+                _options[record.GetName(i).ToLower()] = record.GetValue(i).ToString().ToLower();
+            }
         }
+
         public void ApplyTo(IDataContainer parent)
         {
             throw new NotImplementedException();
@@ -23,5 +31,7 @@ namespace CH.Alika.Json.Server.Model
         {
             throw new NotImplementedException();
         }
+
+        public bool IsArray { get { return !_options.ContainsKey("isarray") || "1".Equals(_options["isarray"]); }}
     }
 }

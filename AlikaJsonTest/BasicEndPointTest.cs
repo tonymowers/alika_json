@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Globalization;
+using System.IO;
+using System.Text;
 using CH.Alika.Json.Server;
 using CH.Alika.Json.Shared.Model;
 using Newtonsoft.Json;
@@ -83,13 +86,17 @@ namespace CH.Alika.Json.Test
                 ApiVersion = "1.0",
                 Method = "stproc_test_Dataset"
             };
-            string response;
-            using (var connection = OpenConnection())
+            
+            StringBuilder sb = new StringBuilder();
+            using (TextWriter writer = new StringWriter(sb))
             {
-                string request = JsonConvert.SerializeObject(rpcRequest);
-                response = _endpoint.process(connection, request);
+                using (var connection = OpenConnection())
+                {
+                    string request = JsonConvert.SerializeObject(rpcRequest);
+                    _endpoint.Process(connection, RequestFactory.Create(rpcRequest), writer);
+                }
             }
-            Console.Out.WriteLine(response);
+            Console.Out.WriteLine(sb.ToString());
             Console.Out.WriteLine("done");
         }
 

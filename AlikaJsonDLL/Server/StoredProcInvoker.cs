@@ -1,16 +1,14 @@
-﻿using System;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using System.IO;
 using CH.Alika.Json.Server.Model;
 using Newtonsoft.Json;
 
 namespace CH.Alika.Json.Server
 {
-   
-    class StoredProcInvoker
+    internal class StoredProcInvoker
     {
-        private readonly ISqlCommandFactory _sqlCmdFactory;
         private readonly IRecordFactory _recordFactory;
+        private readonly ISqlCommandFactory _sqlCmdFactory;
 
         public StoredProcInvoker(ISqlCommandFactory sqlCmdFactory)
         {
@@ -20,35 +18,39 @@ namespace CH.Alika.Json.Server
 
         public void Invoke(SqlConnection connection, IStoredProcRequest request, TextWriter writer)
         {
-            bool optionsSet = false;
+            var optionsSet = false;
+            var isArray = false;
             IDataContainer response = new JObjectDataContainer();
             using (var cmd = _sqlCmdFactory.CreateSqlCommand(connection, request))
             {
-                using (SqlDataReader reader = cmd.ExecuteReader())
+                using (var reader = cmd.ExecuteReader())
                 {
                     do
                     {
-                        IOptions options = ApplyResultToJObject(response, reader,optionsSet);
-                        if (!optionsSet && options != null)
-                        {
-                            optionsSet = true;
-                            response = new StreamedRootDataContainer(writer,true);
-                        }
+                        var options = ApplyResultToJObject(response, reader, isArray);
+                        if (optionsSet || options == null) continue;
+
+                        // apply options
+                        optionsSet = true;
+                        isArray = options.IsArray;
+                        response = new StreamedRootDataContainer(writer, isArray);
                     } while (reader.NextResult());
                 }
             }
 
             if (response.IsSerializable)
-                SerializeObject(response.ObjectRepresentation,writer);
+                SerializeObject(response.ObjectRepresentation, writer);
 
             response.End();
         }
 
-        private IOptions ApplyResultToJObject(IDataContainer response, SqlDataReader reader,bool arrayElemntsOnly)
+        private IOptions ApplyResultToJObject(IDataContainer response, SqlDataReader reader, bool arrayElemntsOnly)
         {
             while (reader.Read())
             {
-                var jsonRecord = arrayElemntsOnly ? _recordFactory.CreateArrayElement(reader) : _recordFactory.Create(reader);
+                var jsonRecord = arrayElemntsOnly
+                    ? _recordFactory.CreateArrayElement(reader)
+                    : _recordFactory.Create(reader);
                 if (jsonRecord is IOptions)
                     return jsonRecord as IOptions;
 
@@ -62,15 +64,14 @@ namespace CH.Alika.Json.Server
 
         private static void SerializeObject(object value, TextWriter writer)
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(new JsonSerializerSettings { Formatting = Formatting.Indented });
+            var jsonSerializer = JsonSerializer.Create(new JsonSerializerSettings {Formatting = Formatting.Indented});
 
-            using (JsonTextWriter jsonWriter = new JsonTextWriter(writer))
+            using (var jsonWriter = new JsonTextWriter(writer))
             {
                 jsonWriter.Formatting = jsonSerializer.Formatting;
 
                 jsonSerializer.Serialize(jsonWriter, value);
             }
         }
-
     }
 }
