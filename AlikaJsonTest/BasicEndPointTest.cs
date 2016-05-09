@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Globalization;
 using System.IO;
 using System.Text;
-using CH.Alika.Json.Server;
 using CH.Alika.Json.Shared.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -92,7 +90,6 @@ namespace CH.Alika.Json.Test
             {
                 using (var connection = OpenConnection())
                 {
-                    string request = JsonConvert.SerializeObject(rpcRequest);
                     _endpoint.Process(connection, RequestFactory.Create(rpcRequest), writer);
                 }
             }
@@ -160,8 +157,11 @@ namespace CH.Alika.Json.Test
 
     class UserData
     {
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string UserId { get; set; }
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string FirstName { get; set; }
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public string LastName { get; set; }
     }
 }
