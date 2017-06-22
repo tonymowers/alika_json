@@ -7,30 +7,34 @@ namespace CH.Alika.Json.Server.Model
     internal class StreamedDataContainer : IDataContainer
     {
         private readonly IFieldNameTranslator _fieldNameXlator = new DefaultFieldNameTranslator();
+        private readonly bool _isArray;
+        private readonly bool _isArrayOfArray;
         private readonly JsonTextWriter _writer;
         private string _arrayName;
-        private readonly bool _isArray;
 
-        public StreamedDataContainer(TextWriter textWriter, bool isArray = false, bool isFormatted = false)
+        public StreamedDataContainer(TextWriter textWriter, bool isArray = false, bool isArrayOfArray = false, bool isFormatted = false)
         {
-            _isArray = isArray;
-            if (textWriter != null)
+            _isArrayOfArray = isArrayOfArray;
+            _isArray = isArray || isArrayOfArray;
+
+            _writer = new JsonTextWriter(textWriter)
             {
-                _writer = new JsonTextWriter(textWriter) {Formatting = isFormatted ? Formatting.Indented : Formatting.None};
-                if (_isArray)
-                    _writer.WriteStartArray();
-                else
-                    _writer.WriteStartObject();
-            }
+                Formatting = isFormatted ? Formatting.Indented : Formatting.None
+            };
+            if (_isArray)
+                _writer.WriteStartArray();
+            else
+                _writer.WriteStartObject();
         }
 
-        private StreamedDataContainer(JsonTextWriter textWriter)
+        private StreamedDataContainer(JsonTextWriter textWriter, bool isArray = false)
         {
-            if (textWriter != null)
-            {
-                _writer = textWriter;
+            _isArray = isArray;
+            _writer = textWriter;
+            if (_isArray)
+                _writer.WriteStartArray();
+            else
                 _writer.WriteStartObject();
-            }
         }
 
         public void AddObject(IDataContainer container)
@@ -41,11 +45,12 @@ namespace CH.Alika.Json.Server.Model
         public void AddProperty(string name, object value)
         {
             if (_isArray)
-                throw new NotSupportedException("cannot add properties directly to JSON arrays"); 
-
-            CloseArray();
-            if (_writer != null)
             {
+                _writer.WriteValue(value);
+            }
+            else
+            {
+                CloseArray();
                 _writer.WritePropertyName(PropertyName(name));
                 _writer.WriteValue(value);
             }
@@ -53,7 +58,7 @@ namespace CH.Alika.Json.Server.Model
 
         public IDataContainer CreateArrayElement(string name)
         {
-            if (_writer != null && !name.Equals(_arrayName) && !_isArray)
+            if (!name.Equals(_arrayName) && !_isArray)
             {
                 CloseArray();
                 _arrayName = name;
@@ -61,18 +66,17 @@ namespace CH.Alika.Json.Server.Model
                 _writer.WriteStartArray();
             }
 
-            return new StreamedDataContainer(_writer);
+            return new StreamedDataContainer(_writer,_isArrayOfArray);
         }
 
         public IDataContainer CreateObject(string name)
         {
             if (_isArray)
-                throw new NotSupportedException("cannot add nameed objects directly to JSON arrays"); 
+                throw new NotSupportedException("cannot add named objects directly to JSON arrays");
 
-            if (_writer != null)
-            {
-                _writer.WritePropertyName(PropertyName(name));
-            }
+
+            _writer.WritePropertyName(PropertyName(name));
+
 
             return new StreamedDataContainer(_writer);
         }
@@ -89,14 +93,11 @@ namespace CH.Alika.Json.Server.Model
 
         public void End()
         {
-            if (_writer != null)
-            {
-                CloseArray();
-                if (_isArray)
-                    _writer.WriteEndArray();
-                else
-                    _writer.WriteEndObject();
-            }
+            CloseArray();
+            if (_isArray)
+                _writer.WriteEndArray();
+            else
+                _writer.WriteEndObject();
         }
 
         private void CloseArray()

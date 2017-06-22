@@ -32,8 +32,8 @@ namespace CH.Alika.Json.Server
 
                         // apply options
                         optionsSet = true;
-                        isArray = options.IsArray;
-                        response = new StreamedDataContainer(writer, isArray,options.IsFormatted);
+                        isArray = options.IsArray || options.IsArrayOfArray;
+                        response = new StreamedDataContainer(writer, options.IsArray, options.IsArrayOfArray, options.IsFormatted);
                     } while (reader.NextResult());
                 }
             }

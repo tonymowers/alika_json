@@ -3,6 +3,7 @@
     public interface IOptions
     {
         bool IsArray { get; }
+        bool IsArrayOfArray { get;  }
         bool IsFormatted { get; }
     }
 }

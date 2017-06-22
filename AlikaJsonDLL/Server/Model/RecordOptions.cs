@@ -34,5 +34,6 @@ namespace CH.Alika.Json.Server.Model
 
         public bool IsArray { get { return !_options.ContainsKey("isarray") || "1".Equals(_options["isarray"]); }}
         public bool IsFormatted { get { return !_options.ContainsKey("isformatted") || "1".Equals(_options["isformatted"]); } }
+        public bool IsArrayOfArray { get { return _options.ContainsKey("isarrayofarray") && "1".Equals(_options["isarrayofarray"]); } }
     }
 }
