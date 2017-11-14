@@ -26,7 +26,7 @@
     </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>AlikaKey.pfx</AssemblyOriginatorKeyFile>
@@ -93,6 +93,7 @@
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AlikaJsonDLL.nuspec" />
     <None Include="AlikaKey.pfx" />
     <None Include="packages.config" />
   </ItemGroup>

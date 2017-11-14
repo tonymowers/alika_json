@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <projectUrl>https://github.com/tony-mowers/alika_json</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>First NuGet package release.</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>REST JSON SqlServer</tags>
+  </metadata>
+</package>
